@@ -45,6 +45,8 @@ const bakedMaterial = new THREE.MeshBasicMaterial({
     // wireframe: true
 })
 
+const material = new THREE.MeshNormalMaterial()
+
 /**
  * Models
  */
@@ -58,18 +60,19 @@ gltfLoader.setDRACOLoader(dracoLoader)
 let mixer = null
 let chair = null
 let chairBody = null
-const scale = 0.01
+const scale = 1
 
 // Physics material
 const plasticMaterial = new CANNON.Material('plastic')
 
 gltfLoader.load(
-    '/models/Chair/chair-blue.glb',
+    '/models/scene_simple_combined.glb',
     (gltf) => 
     {   
         gltf.scene.traverse((child) =>
         {
-            child.material = bakedMaterial
+            // child.material = bakedMaterial
+            child.material = material
         })
 
         gltf.scene.scale.set(scale, scale, scale)
@@ -104,7 +107,7 @@ gltfLoader.load(
     chairBody.material = plasticMaterial
     //below the position needs to be the same as the three.js mesh position
     // body.position.copy(position)
-    world.addBody(chairBody)
+    // world.addBody(chairBody)
     }
 )
 
@@ -112,49 +115,49 @@ gltfLoader.load(
 /**
  * box
  */
-const boxGeometry = new THREE.BoxGeometry(1, 1, 1)
-const boxMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000})
+// const boxGeometry = new THREE.BoxGeometry(1, 1, 1)
+// const boxMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000})
 
-const width = 1
-const height = 1
-const depth = 1
-let position = {x: - 0.5, y: 1, z: 0}
+// const width = 1
+// const height = 1
+// const depth = 1
+// let position = {x: - 0.5, y: 1, z: 0}
 
-// Three.js mesh
-const mesh = new THREE.Mesh(boxGeometry, boxMaterial)
-mesh.scale.set(width, height, depth)
-mesh.castShadow = true
-// mesh.position.copy(position)
-scene.add(mesh)
+// // Three.js mesh
+// const mesh = new THREE.Mesh(boxGeometry, boxMaterial)
+// mesh.scale.set(width, height, depth)
+// mesh.castShadow = true
+// // mesh.position.copy(position)
+// scene.add(mesh)
 
-// Cannon.js body
-const shape = new CANNON.Box(new CANNON.Vec3(width * 0.5, height * 0.5, depth * 0.5))
+// // Cannon.js body
+// const shape = new CANNON.Box(new CANNON.Vec3(width * 0.5, height * 0.5, depth * 0.5))
 
-const body = new CANNON.Body({
-    mass: 1,
-    position: new CANNON.Vec3(-0.5, 1, 0),
-    shape: shape
-})
-body.position.copy(position)
-world.addBody(body)
+// const body = new CANNON.Body({
+//     mass: 1,
+//     position: new CANNON.Vec3(-0.5, 1, 0),
+//     shape: shape
+// })
+// body.position.copy(position)
+// world.addBody(body)
 
 
 /**
  * Room
  */
-const room = new THREE.Mesh(
-    new THREE.BoxGeometry(5, 5, 5),
-    new THREE.MeshStandardMaterial({
-        color: '#00ffff',
-        metalness: 0,
-        roughness: 0.5
-    })
-)
-room.receiveShadow = true
-room.material.side = THREE.BackSide
-room.position.y = 5
+// const room = new THREE.Mesh(
+//     new THREE.BoxGeometry(5, 5, 5),
+//     new THREE.MeshStandardMaterial({
+//         color: '#00ffff',
+//         metalness: 0,
+//         roughness: 0.5
+//     })
+// )
+// room.receiveShadow = true
+// room.material.side = THREE.BackSide
+// room.position.y = 5
 // floor.rotation.x = - Math.PI * 0.5
-scene.add(room)
+// scene.add(room)
 
 // Cannon.js Room
 const roomBody = new CANNON.Body()
@@ -173,7 +176,7 @@ roomBody.addShape(wallShape2, new CANNON.Vec3(2.5, 0, 0))
 const roofBody = new CANNON.Box(new CANNON.Vec3(5 * 0.5, 0.01 * 0.5, 5 * 0.5))
 roomBody.addShape(roofBody, new CANNON.Vec3(0, 2.5, 0))
 
-world.addBody(roomBody)
+// world.addBody(roomBody)
 
 
 /**
@@ -185,19 +188,19 @@ const raycaster = new THREE.Raycaster()
 /**
  * Lights
  */
-// const ambientLight = new THREE.AmbientLight(0xffffff, 1)
-// scene.add(ambientLight)
+const ambientLight = new THREE.AmbientLight(0xffffff, 1)
+scene.add(ambientLight)
 
-// const directionalLight = new THREE.DirectionalLight(0xffffff, 2)
-// directionalLight.castShadow = true
-// directionalLight.shadow.mapSize.set(1024, 1024)
-// directionalLight.shadow.camera.far = 15
-// directionalLight.shadow.camera.left = - 7
-// directionalLight.shadow.camera.top = 7
-// directionalLight.shadow.camera.right = 7
-// directionalLight.shadow.camera.bottom = - 7
-// directionalLight.position.set(5, 5, 5)
-// scene.add(directionalLight)
+const directionalLight = new THREE.DirectionalLight(0xffffff, 2)
+directionalLight.castShadow = true
+directionalLight.shadow.mapSize.set(1024, 1024)
+directionalLight.shadow.camera.far = 15
+directionalLight.shadow.camera.left = - 7
+directionalLight.shadow.camera.top = 7
+directionalLight.shadow.camera.right = 7
+directionalLight.shadow.camera.bottom = - 7
+directionalLight.position.set(5, 5, 5)
+scene.add(directionalLight)
 
 /**
  * Sizes
@@ -313,7 +316,7 @@ const tick = () =>
         // Cast a ray
         raycaster.setFromCamera(mouse, camera)
 
-        const objectsToIntersect = [mesh, chair.children[0]]
+        const objectsToIntersect = [chair.children[0]]
         const intersects = raycaster.intersectObjects(objectsToIntersect)
 
         // for(const object of objectsToIntersect)
@@ -351,12 +354,12 @@ const tick = () =>
     roomBody.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 0, 1), Math.PI * 0.1 * elapsedTime)
    
     // console.log(Math.floor(elapsedTime)%7);
-    room.position.copy(roomBody.position)
-    room.quaternion.copy(roomBody.quaternion)   
+    // room.position.copy(roomBody.position)
+    // room.quaternion.copy(roomBody.quaternion)   
  
     // Update box physics
-    mesh.position.copy(body.position)
-    mesh.quaternion.copy(body.quaternion)
+    // mesh.position.copy(body.position)
+    // mesh.quaternion.copy(body.quaternion)
 
     // Update mixer (animation)
     if(mixer != null)
